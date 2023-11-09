@@ -7,6 +7,7 @@ from werkzeug.exceptions import BadRequest
 
 from app.main.exceptions.error_handler import CustomException
 from app.main.extensions.flask_extensions import api
+from app.main.services.info_service import get_info_details
 
 info_namespace = Namespace(
     name="Actuator", description="Actuator APIs/Resources", path="/"
@@ -27,14 +28,16 @@ class InfoResource(Resource):
     @info_namespace.doc()
     def get(self):
         print(" I am inside Resource...")
+        det = get_info_details()
+        logging.info(det)
         # raise CustomException(
         #     "APP_01", False, "Random Msg", "Random Desc", HTTPStatus.BAD_REQUEST
         # )
         # raise CustomException("User was not found")
-        abort(HTTPStatus.BAD_REQUEST, message="Its a bad request", custom="I am value")
+        # abort(HTTPStatus.BAD_REQUEST, message="Its a bad request", custom="I am value")
         # raise BadRequest(description="I am Bad descriptin", custom="I am custom")
         # raise HTTPException(description="Not Found")
-        return {"msg": "Info Resource", "status_code": HTTPStatus.OK}, HTTPStatus.OK
+        return det, HTTPStatus.OK
 
     @info_namespace.doc()
     @info_namespace.expect(info_api, parser)
@@ -43,7 +46,7 @@ class InfoResource(Resource):
         logging.info(request.get_json())
         # raise CustomException("I am Custom Exception")
         raise CustomException(
-            "APP_01", False, "Random Msg", "Random Desc", HTTPStatus.BAD_REQUEST
+            "APP_01", False, "Random Msg", {"desc": "desc-1"}, HTTPStatus.BAD_REQUEST
         )
         return {
             "msg": "Accepted",
