@@ -2,20 +2,29 @@ import logging
 import os
 
 import coloredlogs
+import httpx
 from flask import Flask, jsonify, make_response, send_from_directory
 from flask_restx._http import HTTPStatus
 from werkzeug.exceptions import BadRequest
 
 from app.main.extensions.flask_extensions import api
-from app.main.resources.info_resource import InfoResource, info_namespace
 from app.main.resources.error_resource import error_namespace
+from app.main.resources.info_resource import InfoResource, info_namespace
 from app.main.utils import constants
+
+print(f"APP ENVIRONMENT: {os.environ.get('ENV')}")
 
 # Make sure to define the logger object
 logger = logging.getLogger(__name__)
-coloredlogs.install(
-    level="INFO", fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
+
+log_level = "INFO"
+fmt_str = r"[%(asctime)s] - %(name)s - P%(process)s - %(levelname)s: %(message)s"
+if os.environ.get("ENV") in [None, "development"]:
+    log_level = "DEBUG"
+# fmt_str = r"[%(asctime)s] p%(process)s %(filename)s:%(lineno)d %(levelname)s - %(message)s"
+# fmt_str = "%(asctime)s,%(msecs)d %(levelname)-8s [%(pathname)s:%(lineno)d in function %(funcName)s] %(message)s"
+
+coloredlogs.install(level=log_level, fmt=fmt_str)
 
 
 ## Create the Flask App Object and add basic configuration to it
@@ -32,10 +41,18 @@ def favicon():
 
 @app.route("/")
 def index():
-    logging.info("Index API processing...")
+    logging.info("INFO: Index API processing...")
+    logging.debug("DEBUG: Index API processing...")
     r = {"msg": "Welcome to FlaskRestX Application", "docs_url": constants.API_DOCS_URL}
     logging.info(f"Index API Response: {r}")
     return r
+
+
+@app.route("/data")
+def get_data():
+    URL = "https://jsonplaceholder.typicode.com/todos/1"
+    req = httpx.request("GET", URL)
+    return req.json()
 
 
 @api.errorhandler(BadRequest)
