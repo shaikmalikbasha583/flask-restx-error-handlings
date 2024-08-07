@@ -1,9 +1,9 @@
+import imp
 import json
 from http import HTTPStatus
 from typing import Any, Iterable, Mapping
 
 from flask import jsonify
-from werkzeug.wrappers import Response
 
 
 def success_response(
@@ -23,7 +23,7 @@ class SuccessResponse:
     def __repr__(self) -> str:
         return json.dumps(*self)
 
-    def to_dict(self) -> dict:
+    def serialize(self) -> dict:
         return {"success": self.success, "message": self.message, "data": self.data}
 
     # def __init__(
